@@ -1,0 +1,25 @@
+{
+  "name": "webapi_dependencyinjection",
+  "version": "0.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "Aurélien St",
+  "type": "commonjs",
+  "main": "src/app.ts",
+  "scripts": {
+    "start": "node -r @swc-node/register ./src/app.ts",
+    "dev": "node --watch -r @swc-node/register ./src/app.ts"
+  },
+  "dependencies": {
+    "@inversifyjs/http-core": "^4.8.1",
+    "@inversifyjs/http-express": "^4.8.1",
+    "express": "^5.2.1",
+    "inversify": "^7.10.8",
+    "reflect-metadata": "^0.2.2"
+  },
+  "devDependencies": {
+    "@swc-node/register": "^1.11.1",
+    "@types/express": "^5.0.6",
+    "typescript": "^5.9.3"
+  }
+}
