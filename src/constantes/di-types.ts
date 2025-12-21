@@ -1,3 +1,7 @@
 export const DI_TYPES = {
-    TotoService: Symbol.for("TotoService")
+    // Middlewares
+    ExampleMiddleware: Symbol.for('ExampleMiddleware'),
+
+    // Services
+    TotoService: Symbol.for("TotoService"),
 };

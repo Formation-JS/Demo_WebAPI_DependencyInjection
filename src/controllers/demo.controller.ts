@@ -2,7 +2,8 @@ import express from 'express';
 import { inject } from "inversify";
 import { DI_TYPES } from "../constantes/di-types";
 import { ITotoService } from '../domains/toto/toto.service';
-import { Controller, Get, Params, Response } from '@inversifyjs/http-core';
+import { ApplyMiddleware, Controller, Get, Params, Response } from '@inversifyjs/http-core';
+
 
 @Controller('/demo')
 export class HomeController {
@@ -29,5 +30,15 @@ export class HomeController {
     ) {
         const message = this.totoService.sayHello(id);
         response.send({ message });
+    }
+
+    @Get('/middleware')
+    @ApplyMiddleware(DI_TYPES.ExampleMiddleware)
+    public async getMiddleware(
+        @Response() response: express.Response
+    ) {
+        response.json({
+            message: 'Route qui utilise un middleware !'
+        });
     }
 }
