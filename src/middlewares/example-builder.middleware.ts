@@ -1,7 +1,10 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 
 
-//! Middleware Builder (Standard Express) qui peut être utiliser avec le decorateur custom "UseMiddleware"
+//! Middleware Builder (Standard Express) qui peut être utiliser :
+//! - Via l'IOC en le configurant dans "inversify.config.ts"
+//! - Via le decorateur custom "UseMiddleware" (configuration à la volé)
+
 type ExampleBuilderMiddlewareConfig = {
   info: string;
   nb: number;

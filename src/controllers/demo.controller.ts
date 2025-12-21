@@ -73,4 +73,14 @@ export class HomeController {
             message: 'Route qui utilise un middleware avec builder (Config 3) !'
         });
     }
+
+    @Get('/middleware-builder/4')
+    @ApplyMiddleware(IOC_TYPES.PreconfigMiddleware)
+    public async getMiddlewareBuilder4(
+        @Response() response: express.Response,
+    ) {
+        response.json({
+            message: 'Route qui utilise un middleware avec builder (Config 4) !'
+        });
+    }
 }
