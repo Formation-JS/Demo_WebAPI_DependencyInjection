@@ -12,22 +12,22 @@ export class HomeController {
         @inject(DI_TYPES.TotoService) private totoService: ITotoService
     ) { }
 
+    // Définition des routes avec le décorateur
     @Get()
-    public async sayHello1(@Response() response: express.Response) {
-
+    public async sayHelloWorld(
+        @Response() response: express.Response
+    ) {
         response.json({
             message: 'Hello World'
         });
     }
 
-    @Get('/:id')
-    public async SayHello2(
+    @Get('/name/:id')
+    public async sayHelloName(
         @Params({ name: 'id', })  id: string,
         @Response() response: express.Response,
     ) {
-
         const message = this.totoService.sayHello(id);
-
         response.send({ message });
     }
 }

@@ -12,7 +12,7 @@ const webapi = async () => {
       useCookies: true,
       useJson: true,
       useUrlEncoded: true,
-    },
+    }
   );
 
   const app: express.Application = await adapter.build();

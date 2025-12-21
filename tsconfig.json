@@ -3,6 +3,8 @@
     "target": "ES2022",
     "module": "commonjs",
     "lib": ["ES2022"],
+    "outDir": "./dist",
+    "rootDir": "./src",
     "moduleResolution": "node",
     "strict": true,
     "esModuleInterop": true,
@@ -10,5 +12,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "types": ["reflect-metadata"]
-  }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts"]
 }
