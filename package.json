@@ -16,11 +16,13 @@
     "@inversifyjs/http-express": "^4.8.1",
     "express": "^5.2.1",
     "inversify": "^7.10.8",
+    "object-hash": "^3.0.0",
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
     "@swc-node/register": "^1.11.1",
     "@types/express": "^5.0.6",
+    "@types/object-hash": "^3.0.6",
     "typescript": "^5.9.3"
   }
 }

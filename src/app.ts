@@ -2,7 +2,9 @@ import "reflect-metadata";
 
 import { InversifyExpressHttpAdapter } from "@inversifyjs/http-express";
 import * as express from "express";
-import { container } from './inversify.config';
+
+import { container } from './ioc/container';
+import './inversify.config';
 
 const webapi = async () => {
   const adapter: InversifyExpressHttpAdapter = new InversifyExpressHttpAdapter(

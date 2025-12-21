@@ -1,4 +1,4 @@
-export const DI_TYPES = {
+export const IOC_TYPES = {
     // Middlewares
     ExampleMiddleware: Symbol.for('ExampleMiddleware'),
 
