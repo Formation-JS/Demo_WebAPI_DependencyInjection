@@ -1,5 +1,11 @@
-import { Container } from 'inversify';
+import { Container, decorate, injectable } from "inversify";
+import { buildProviderModule } from "inversify-binding-decorators";
+import { Controller } from "tsoa";
 
-const container = new Container();
+const iocContainer = new Container();
 
-export { container };
+decorate(injectable(), Controller);
+
+iocContainer.load(buildProviderModule());
+
+export { iocContainer };

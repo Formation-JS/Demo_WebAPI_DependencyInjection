@@ -1,13 +1,12 @@
-import express from 'express';
-import { inject } from "inversify";
+import { inject, injectable } from "inversify";
 import { IOC_TYPES } from "../ioc/types";
 import { ITotoService } from '../domains/toto/toto.service';
-import { ApplyMiddleware, Controller, Get, Params, Response } from '@inversifyjs/http-core';
 import { UseMiddleware } from '../decorators/use-middleware.decorator';
 import { ExampleBuilderMiddleware } from '../middlewares/example-builder.middleware';
+import { Get, Middlewares, Path, Route } from 'tsoa';
+import { ResolveMiddleware } from '../decorators/resolve-middleware.decorator';
 
-
-@Controller('/demo')
+@Route('/demo')
 export class HomeController {
 
     // Injection de dépendance via le constructeur
@@ -17,69 +16,69 @@ export class HomeController {
 
     // Définition des routes avec le décorateur
     @Get()
-    public async sayHelloWorld(
-        @Response() response: express.Response
-    ) {
-        response.json({
+    public async sayHelloWorld() {
+
+        return ({
             message: 'Hello World'
         });
     }
 
     @Get('/name/:id')
-    public async sayHelloName(
-        @Params({ name: 'id', })  id: string,
-        @Response() response: express.Response,
-    ) {
+    public async sayHelloName(@Path() id: string): Promise<{ message: string; }> {
         const message = this.totoService.sayHello(id);
-        response.send({ message });
+        return { message };
     }
 
-    @Get('/middleware')
-    @ApplyMiddleware(IOC_TYPES.ExampleMiddleware)
-    public async getMiddleware(
-        @Response() response: express.Response
-    ) {
-        response.json({
-            message: 'Route qui utilise un middleware !'
+    @Get('/middleware-simple')
+    @Middlewares(ExampleBuilderMiddleware({ info: "No IOC", nb: -1 }))
+    public async getMiddlewareSimple() {
+
+        return ({
+            message: 'Route qui utilise un middleware (Hors Inversify) !'
         });
     }
-    
+
+    @Get('/middleware-ioc')
+    @ResolveMiddleware(IOC_TYPES.ExampleMiddleware)
+    public async getMiddleware() {
+
+        return ({
+            message: 'Route qui utilise un middleware liée à l\'ioc de Inversify !'
+        });
+    }
+
     @Get('/middleware-builder/1')
     @UseMiddleware(ExampleBuilderMiddleware, { info: "La réponse", nb: 42 })
-    public async getMiddlewareBuilder1(
-        @Response() response: express.Response,
-    ) {
-        response.json({
+    public async getMiddlewareBuilder1() {
+
+        return ({
             message: 'Route qui utilise un middleware avec builder (Config 1) !'
         });
     }
-        
+
     @Get('/middleware-builder/2')
     @UseMiddleware(ExampleBuilderMiddleware, { info: "Lorem Ipsum", nb: 1337 })
-    public async getMiddlewareBuilder2(
-        @Response() response: express.Response,
-    ) {
-        response.json({
+    public async getMiddlewareBuilder2() {
+
+        return ({
             message: 'Route qui utilise un middleware avec builder (Config 2) !'
         });
     }
-        
+
     @Get('/middleware-builder/3')
     @UseMiddleware(ExampleBuilderMiddleware, { info: "La réponse", nb: 42 })
-    public async getMiddlewareBuilder3(
-        @Response() response: express.Response,
-    ) {
-        response.json({
+    public async getMiddlewareBuilder3() {
+
+        return ({
             message: 'Route qui utilise un middleware avec builder (Config 3) !'
         });
     }
 
     @Get('/middleware-builder/4')
-    @ApplyMiddleware(IOC_TYPES.PreconfigMiddleware)
-    public async getMiddlewareBuilder4(
-        @Response() response: express.Response,
-    ) {
-        response.json({
+    @ResolveMiddleware(IOC_TYPES.PreconfigMiddleware)
+    public async getMiddlewareBuilder4() {
+
+        return ({
             message: 'Route qui utilise un middleware avec builder (Config 4) !'
         });
     }

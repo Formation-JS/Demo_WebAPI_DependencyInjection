@@ -1,7 +1,7 @@
-import { container } from '../ioc/container';
-import { ApplyMiddleware } from '@inversifyjs/http-core';
+import { iocContainer as container } from '../ioc/container';
 import { RequestHandler } from 'express';
 import hash from 'object-hash';
+import { ResolveMiddleware } from './resolve-middleware.decorator';
 
 //! Pattern pour utiliser des middlewares qui utilise un builder qui retourne un RequestHandler
 
@@ -41,6 +41,6 @@ export function UseMiddleware(builder: MiddlewareBuilder, config: any) {
     console.log(`[UseMiddleware] Auto-binding : ${cacheKey}`);
   }
 
-  // Utilisation du « ApplyMiddleware »
-  return ApplyMiddleware(middlewareSymbol);
+  // Utilisation du « ResolveMiddleware »
+  return ResolveMiddleware(middlewareSymbol);
 }

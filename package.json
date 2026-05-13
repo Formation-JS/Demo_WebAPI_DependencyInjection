@@ -7,17 +7,19 @@
   "type": "commonjs",
   "main": "src/app.ts",
   "scripts": {
-    "build": "tsc",
+    "tsoa": "tsoa spec-and-routes",
+    "build": "npm run tsoa && tsc",
     "start": "node dist/app.js",
-    "dev": "node --watch -r @swc-node/register ./src/app.ts"
+    "dev": "npm run tsoa && node --watch -r @swc-node/register ./src/app.ts"
   },
   "dependencies": {
-    "@inversifyjs/http-core": "^4.8.1",
-    "@inversifyjs/http-express": "^4.8.1",
+    "@scalar/express-api-reference": "^0.9.14",
     "express": "^5.2.1",
     "inversify": "^7.10.8",
+    "inversify-binding-decorators": "^4.0.0",
     "object-hash": "^3.0.0",
-    "reflect-metadata": "^0.2.2"
+    "reflect-metadata": "^0.2.2",
+    "tsoa": "^7.0.0-alpha.0"
   },
   "devDependencies": {
     "@swc-node/register": "^1.11.1",

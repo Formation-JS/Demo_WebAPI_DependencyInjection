@@ -1,37 +1,56 @@
 # Injection de dépendance en WebAPI avec Express
+Utilisation de l'injection de dépendance de `inversify`, du routage via `tsoa` et documentation OpenAPI avec `scalar`. 
 
 ## Packages utilisés dans cette démo
 ```
 express v5.2
 inversify v7
-@inversifyjs/http-core v4.8
-@inversifyjs/http-express v4.8
+inversify-binding-decorators v4
+@scalar/express-api-reference v0.9
+tsoa v7 (Alpha)
 ```
 
 ## Description de la démo
-- Configuration d'Inversify 
+- Configuration de `Inversify` 
 - Injection des services
-- Décorateur pour configurer le routing depuis les controllers
-- Exemple d'utilisation de middleware
-  - Classe "ExpressMiddleware" :  
-    _Pattern natif d'Inversify (Injection d'une classe "ExpressMiddleware")._
-  - Builder préconfiguré :  
-    _Injection d'un middleware Express standard pré-configuré dans le conteneur (inversify.config.ts)._  
-  - Décorateur custom (@UseMiddleware) :  
-    _Solution "maison" pour pouvoir utiliser des middlewares Express standards (builders) directement sur les routes (sans passer par la configuration du conteneur)._
+- Décorateur `TSOA` pour configurer le routage depuis les contrôleurs
+- Exemple d'utilisation de middlewares (simples et avec `Inversify`)
+
+## Détails des middlewares
+
+### Simple
+Utilisation des middlewares sans exploiter `Inversify`.  
+Décorateur à utiliser : `@Middlewares(fct)`.  
+
+### Avec Inversify
+Mise en place de middlewares qui exploitent les injections de dépendance.  
+Deux décorateurs ont été créés pour cette utilisation : `ResolveMiddleware` et `UseMiddleware`
+
+Scénarios possibles : 
+- Classe implémentant `IExpressMiddleware`:  
+  Configuration : `container.bind(IOC_TYPES.FooMiddleware).to(FooMiddleware)`  
+  Décorateur à utiliser : `@ResolveMiddleware(ref-ioc)`  
+  _Permet d'injecter des services dans le middleware (basé sur le pattern natif d'Inversify)._
+
+- Builder préconfiguré :  
+  Configuration : `container.bind(IOC_TYPES.BarMiddleware).toConstantValue({ execute: ... })`  
+  Décorateur à utiliser : `@ResolveMiddleware(ref-ioc)`  
+
+- Enregistrement à la volée :  
+  Pas de configuration  
+  Décorateur à utiliser : `@UseMiddleware(fct)`  
+  _Solution "maison" pour pouvoir utiliser des middlewares Express standards (builders) dans le mécanisme d'Inversify._
 
 ## Documentation
 - Inversify : https://inversify.io/docs/introduction/getting-started/
 - Inversify Framework : https://inversify.io/framework/docs/introduction/getting-started/
-- Modules complémentaires :
-  - Validation (zod) : https://inversify.io/framework/validation/introduction/getting-started/
-  - Swagger : https://inversify.io/framework/openapi/introduction/getting-started/
+- Tsoa : https://tsoa-community.github.io/docs/getting-started.html
 
 ## Remarque
 L'injection de dépendance avec Inversify est assez stricte, il existe des alternatives plus légères : 
-- `awilix` et `awilix-express`  \
-  _Configuration plus "simple", injection par "nom de variable" sans configuration._  \
-  _Mécanisme de routing intégré avec les décorateurs (@route, @GET, @POST, ...)_
-- `tsyringe`  \
-  _Injection par Constructeur et Décorateur avec configuration légère et explicite._  \
-  _Pas d'intégration officielle pour express (Nécessite d'implémenter un connecteur pour la gestion du routing)._
+- `awilix` et `awilix-express`  
+  _Configuration plus "simple", injection par "nom de variable" sans configuration._  
+  _Mécanisme de routage intégré avec les décorateurs (@route, @GET, @POST, ...)_
+- `tsyringe`  
+  _Injection par constructeur et décorateur avec configuration légère et explicite._  
+  _Pas d'intégration officielle pour Express (nécessite d'implémenter un connecteur pour la gestion du routage)._

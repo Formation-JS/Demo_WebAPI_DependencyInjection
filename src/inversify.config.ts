@@ -1,4 +1,4 @@
-import { container } from './ioc/container';
+import { iocContainer as container } from './ioc/container';
 import { IOC_TYPES } from './ioc/types';
 import { ITotoService, TotoService } from './domains/toto/toto.service';
 import { HomeController } from './controllers/demo.controller';

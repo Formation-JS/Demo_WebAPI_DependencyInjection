@@ -5,13 +5,14 @@
     "lib": ["ES2022"],
     "outDir": "./dist",
     "rootDir": "./src",
-    "moduleResolution": "node",
     "strict": true,
     "esModuleInterop": true,
     // Options cruciales pour Inversify et les décorateurs
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "types": ["reflect-metadata"]
+    "types": ["reflect-metadata"],
+    // Options pour Scalar avec TSOA
+    "resolveJsonModule": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts"]

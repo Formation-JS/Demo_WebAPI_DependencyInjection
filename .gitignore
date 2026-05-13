@@ -1,3 +1,6 @@
+# Build TSOA
+src/generated
+
 # Logs
 logs
 *.log
