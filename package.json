@@ -7,10 +7,13 @@
   "type": "commonjs",
   "main": "src/app.ts",
   "scripts": {
+    "generate:models": "node -r @swc-node/register ./src/validator-type-generator.ts",
     "tsoa": "tsoa spec-and-routes",
-    "build": "npm run tsoa && tsc",
+    "prebuild": "npm run generate:models && npm run tsoa",
+    "build": "tsc",
     "start": "node dist/app.js",
-    "dev": "npm run tsoa && node --watch -r @swc-node/register ./src/app.ts"
+    "predev": "npm run generate:models && npm run tsoa",
+    "dev": "node --watch -r @swc-node/register ./src/app.ts"
   },
   "dependencies": {
     "@scalar/express-api-reference": "^0.9.14",
@@ -19,12 +22,14 @@
     "inversify-binding-decorators": "^4.0.0",
     "object-hash": "^3.0.0",
     "reflect-metadata": "^0.2.2",
-    "tsoa": "^7.0.0-alpha.0"
+    "tsoa": "^7.0.0-alpha.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@swc-node/register": "^1.11.1",
     "@types/express": "^5.0.6",
     "@types/object-hash": "^3.0.6",
+    "json-schema-to-typescript": "^15.0.4",
     "typescript": "^5.9.3"
   }
 }

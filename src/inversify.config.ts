@@ -4,9 +4,11 @@ import { ITotoService, TotoService } from './domains/toto/toto.service';
 import { HomeController } from './controllers/demo.controller';
 import { ExampleClassMiddleware } from './middlewares/example-class.middleware';
 import { ExampleBuilderMiddleware } from './middlewares/example-builder.middleware';
+import { ProductController } from './controllers/product.controller';
 
 // Binding des controllers
 container.bind(HomeController).toSelf().inSingletonScope();
+container.bind(ProductController).toSelf().inSingletonScope();
 
 // Binding des middlewares
 // - Classe de type "ExpressMiddleware"
