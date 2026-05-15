@@ -8,6 +8,8 @@ inversify v7
 inversify-binding-decorators v4
 @scalar/express-api-reference v0.9
 tsoa v7 (Alpha)
+zod v4
+json-schema-to-typescript v15
 ```
 
 ## Description de la démo
