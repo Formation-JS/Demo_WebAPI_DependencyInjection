@@ -15,6 +15,7 @@ tsoa v7 (Alpha)
 - Injection des services
 - Décorateur `TSOA` pour configurer le routage depuis les contrôleurs
 - Exemple d'utilisation de middlewares (simples et avec `Inversify`)
+- Utilisation de Zod adaptée à TSOA
 
 ## Détails des middlewares
 
@@ -40,6 +41,19 @@ Scénarios possibles :
   Pas de configuration  
   Décorateur à utiliser : `@UseMiddleware(fct)`  
   _Solution "maison" pour pouvoir utiliser des middlewares Express standards (builders) dans le mécanisme d'Inversify._
+
+## Zod + Tsoa
+La validation de données par `TSOA` est basée sur une utilisation de types TS documentés en JSDoc.  
+Dans cette démo, j'ai mis en place une conversion des schémas `Zod` pour générer les fichiers TS.  
+_Cas pratique : Utilisation de schémas de validation communs avec l'app client._  
+
+### Utilisation
+Le script `src/validator-type-generator.ts` parcourt les schémas du dossier `src/validators` et génère les fichiers TS dans le dossier `src/generated/types`.  
+
+Fonctionnement des commandes :
+- `generate:models` : Génération des types basée sur Zod
+- `predev` : Commande lançant les outils de génération _(Déclenchement automatique avant `dev`)_
+- `dev` : Lancement de l'app avec un watcher
 
 ## Documentation
 - Inversify : https://inversify.io/docs/introduction/getting-started/
