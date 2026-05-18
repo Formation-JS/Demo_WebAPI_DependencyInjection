@@ -93,7 +93,8 @@ async function generateModels() {
       injectTsoaTagsDynamically(jsonSchema);
 
       // Generation d'une interface TS avec JSDoc
-      const typeName = `${exportName}Type`;
+      const [initialName, ...restName] = exportName.split('');
+      const typeName = `${initialName.toUpperCase()}${restName.join('')}Type`;
       const tsCode = await compile(jsonSchema as any, typeName, {
         additionalProperties: false, // Stricte par défaut
         bannerComment: '/* \n * Fichier généré automatiquement depuis Zod.\n * NE PAS MODIFIER MANUELLEMENT.\n */',

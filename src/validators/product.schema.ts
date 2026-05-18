@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // Exemple de schema
-export const ProductSchema = z.object({
+export const productSchema = z.object({
   id: z.uuid()
     .describe("L'identifiant unique de l'objet"),
   name: z.string()
