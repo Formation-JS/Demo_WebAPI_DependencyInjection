@@ -6,62 +6,77 @@ import { ZodType } from 'zod';
 const validatorFolder = path.join(__dirname, "./validators");
 
 function injectTsoaTagsDynamically(schema: any) {
-    if (!schema || typeof schema !== 'object') return;
+  if (!schema || typeof schema !== 'object') return;
 
-    // Detection magique des dates (et types non représentables)
-    // * Si le nœud est totalement vide `{}`, c'est que Zod l'a mis en "any".
-    // * On le convertit à la volée en type string ISO pour TSOA.
-    // * Alternative : Ajouter un tag "[Date]" dans la description pour le detecter
-    if (Object.keys(schema).length === 0) {
-        schema.type = 'string';
-        schema.format = 'date-time';
-        return;
-    }
+  // Detection magique des dates (et types non représentables)
+  // * Si le nœud est totalement vide `{}`, c'est que Zod l'a mis en "any".
+  // * On le convertit à la volée en type string ISO pour TSOA.
+  // * Alternative : Ajouter un tag "[Date]" dans la description pour le detecter
+  const isZodDateFallback =
+    (!schema.type || schema.type === 'object' || Array.isArray(schema.type))
+    && !schema.properties
+    && !schema.anyOf
+    && !schema.$ref
+    && !schema.items;
 
-    // Parcours sécurisé des noeuds schémas
-    if (schema.properties) Object.values(schema.properties).forEach(injectTsoaTagsDynamically);
-    if (schema.items) injectTsoaTagsDynamically(schema.items);
-    if (schema.anyOf) schema.anyOf.forEach(injectTsoaTagsDynamically);
+  if (isZodDateFallback) {
+    schema.type = 'string';
+    schema.format = 'date-time';
+    schema.tsType = 'Date';
+    schema._isDate = true;
+  }
 
-    // BUBBLING : Remonter les règles des .nullable() vers le parent
-    if (Array.isArray(schema.anyOf)) {
-        schema.anyOf.forEach((subSchema: any) => {
-            // On isole le sous-schéma qui contient les vraies règles (on ignore le null)
-            if (subSchema.type !== 'null') {
-                // On copie les règles cachées vers le parent
-                ['minLength', 'maxLength', 'minimum', 'maximum', 'pattern', 'exclusiveMinimum'].forEach(rule => {
-                    if (subSchema[rule] !== undefined) schema[rule] = subSchema[rule];
-                });
-                
-                // On conserve l'indication d'entier
-                if (subSchema.type === 'integer') schema._isInteger = true;
-                if (subSchema.format) schema.format = subSchema.format;
-            }
+  // Parcours sécurisé des noeuds schémas
+  if (schema.properties) Object.values(schema.properties).forEach(injectTsoaTagsDynamically);
+  if (schema.items) injectTsoaTagsDynamically(schema.items);
+  if (schema.anyOf) schema.anyOf.forEach(injectTsoaTagsDynamically);
+
+  // BUBBLING : Remonter les règles des .nullable() vers le parent
+  if (Array.isArray(schema.anyOf)) {
+    schema.anyOf.forEach((subSchema: any) => {
+      // On isole le sous-schéma qui contient les vraies règles (on ignore le null)
+      if (subSchema.type !== 'null') {
+        // On copie les règles cachées vers le parent
+        ['minLength', 'maxLength', 'minimum', 'maximum', 'pattern', 'exclusiveMinimum'].forEach(rule => {
+          if (subSchema[rule] !== undefined) schema[rule] = subSchema[rule];
         });
-    }
 
-    // Génération des tags jsdoc pour tsoa
-    const tags: string[] = [];
-    ['minLength', 'maxLength', 'minimum', 'maximum', 'pattern'].forEach(rule => {
-        if (schema[rule] !== undefined) tags.push(`@${rule} ${schema[rule]}`);
+        // On conserve l'indication d'entier
+        if (subSchema.type === 'integer') schema._isInteger = true;
+
+        // Gestion du type date
+        if (subSchema.format && subSchema.tsType !== 'Date' && !subSchema._isDate) {
+          schema.format = subSchema.format;
+        }
+        if (subSchema._isDate) schema._isDate = true;
+      }
     });
+  }
 
-    // Conversion Zod exclusiveMinimum (utilisé par .positive()) -> TSOA minimum
-    if (schema.exclusiveMinimum !== undefined && schema.minimum === undefined) {
-        const isInt = schema.type === 'integer' || schema._isInteger;
-        tags.push(`@minimum ${isInt ? schema.exclusiveMinimum + 1 : schema.exclusiveMinimum}`);
-    }
+  // Génération des tags jsdoc pour tsoa
+  const tags: string[] = [];
+  ['minLength', 'maxLength', 'minimum', 'maximum', 'pattern'].forEach(rule => {
+    if (schema[rule] !== undefined) tags.push(`@${rule} ${schema[rule]}`);
+  });
 
-    if (schema.type === 'integer' || schema._isInteger) tags.push('@isInt');
-    if (schema.format === 'email') tags.push('@isEmail');
-    if (schema.format === 'date-time') tags.push('@isDateTime\n@format date-time');
+  // Conversion Zod exclusiveMinimum (utilisé par .positive()) -> TSOA minimum
+  if (schema.exclusiveMinimum !== undefined && schema.minimum === undefined) {
+    const isInt = schema.type === 'integer' || schema._isInteger;
+    tags.push(`@minimum ${isInt ? schema.exclusiveMinimum + 1 : schema.exclusiveMinimum}`);
+  }
 
-    //! Injection finale dans la description existante (en évitant les doublons)
-    if (tags.length > 0) {
-        const uniqueTags = [...new Set(tags)];
-        const existingDesc = schema.description ? schema.description.trim() + '\n' : '';
-        schema.description = existingDesc + uniqueTags.join('\n');
-    }
+  if (schema.type === 'integer' || schema._isInteger) tags.push('@isInt');
+  if (schema.format === 'email') tags.push('@isEmail');
+  if (schema.format === 'date-time' && schema.tsType !== 'Date' && !schema._isDate) {
+    tags.push('@isDateTime\n@format date-time');
+  }
+
+  //! Injection finale dans la description existante (en évitant les doublons)
+  if (tags.length > 0) {
+    const uniqueTags = [...new Set(tags)];
+    const existingDesc = schema.description ? schema.description.trim() + '\n' : '';
+    schema.description = existingDesc + uniqueTags.join('\n');
+  }
 }
 
 // Générateur de type basé sur les schemas Zod (commun avec le frontend)
