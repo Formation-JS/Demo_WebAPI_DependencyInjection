@@ -1,6 +1,7 @@
 import "reflect-metadata";
-import express from "express";
+import express, { ErrorRequestHandler } from "express";
 import { apiReference } from '@scalar/express-api-reference';
+import { ValidateError } from 'tsoa';
 
 // Configuration de Inversify
 import './inversify.config';
@@ -32,6 +33,31 @@ const webapi = async () => {
       theme: 'elysiajs',
     })
   );
+
+  const errorMiddleware : ErrorRequestHandler = (error, req, res, next) => {
+    
+    // Erreurs de validation TSOA
+    if (error instanceof ValidateError) {
+      console.warn('[Validation Error]', error);
+      res.status(422).json({
+        message: 'Erreur de validation des données',
+        details: error?.fields
+      });
+      return;
+    }
+
+    // Erreurs serveur
+    if (error instanceof Error) {
+      console.error('[Server Error]', error);
+      res.status(500).json({
+        message: 'Erreur interne du serveur',
+      });
+      return;
+    }
+
+    next();
+  };
+  app.use(errorMiddleware);
 
   const port = 3000;
   app.listen(port, () => {
