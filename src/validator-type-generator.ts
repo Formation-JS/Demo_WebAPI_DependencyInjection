@@ -11,7 +11,7 @@ function injectTsoaTagsDynamically(schema: any) {
     // Detection magique des dates (et types non représentables)
     // * Si le nœud est totalement vide `{}`, c'est que Zod l'a mis en "any".
     // * On le convertit à la volée en type string ISO pour TSOA.
-    // * Alternative : Ajouter un tag "@YupDate" dans la description pour le detecter
+    // * Alternative : Ajouter un tag "[Date]" dans la description pour le detecter
     if (Object.keys(schema).length === 0) {
         schema.type = 'string';
         schema.format = 'date-time';
@@ -87,6 +87,7 @@ async function generateModels() {
       const validatorSchema = validatorModule[exportName] as ZodType;
 
       // Conversion du schema en JSON Schema
+      // Alternative en Zod v3 : Utiliser le package "zod-to-json-schema"
       const jsonSchema = validatorSchema.toJSONSchema({
         unrepresentable: "any"
       });
