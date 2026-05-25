@@ -1,3 +1,6 @@
+// ↓ Necessaire si utilisation de l'inversion de dépendence
+//   Injection via le symbole et non la classe
+
 export const IOC_TYPES = {
     // Middlewares
     ExampleMiddleware: Symbol.for('ExampleMiddleware'),
@@ -5,4 +8,4 @@ export const IOC_TYPES = {
 
     // Services
     TotoService: Symbol.for("TotoService"),
-};
+}
