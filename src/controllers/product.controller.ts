@@ -10,7 +10,7 @@ export class ProductController {
   // Définition des routes avec le décorateur
   @Get()
   public async GetAll(
-  ): Promise<ProductSchemaType> {
+  ): Promise<ProductSchemaType[]> {
     throw new Error('Not implemented');
   }
 
