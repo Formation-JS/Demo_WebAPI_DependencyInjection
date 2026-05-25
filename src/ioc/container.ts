@@ -6,6 +6,6 @@ const iocContainer = new Container();
 
 decorate(injectable(), Controller);
 
-iocContainer.load(buildProviderModule());
+iocContainer.loadAsync(buildProviderModule());
 
 export { iocContainer };

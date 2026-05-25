@@ -4,7 +4,7 @@ Utilisation de l'injection de dépendance de `inversify`, du routage via `tsoa` 
 ## Packages utilisés dans cette démo
 ```
 express v5.2
-inversify v7
+inversify v8
 inversify-binding-decorators v4
 @scalar/express-api-reference v0.9
 tsoa v7 (Alpha)
