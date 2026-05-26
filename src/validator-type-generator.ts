@@ -17,7 +17,8 @@ function injectTsoaTagsDynamically(schema: any) {
     && !schema.properties
     && !schema.anyOf
     && !schema.$ref
-    && !schema.items;
+    && !schema.items
+    && !schema.additionalProperties;
 
   if (isZodDateFallback) {
     schema.type = 'string';
@@ -30,6 +31,9 @@ function injectTsoaTagsDynamically(schema: any) {
   if (schema.properties) Object.values(schema.properties).forEach(injectTsoaTagsDynamically);
   if (schema.items) injectTsoaTagsDynamically(schema.items);
   if (schema.anyOf) schema.anyOf.forEach(injectTsoaTagsDynamically);
+  if (schema.additionalProperties && typeof schema.additionalProperties === 'object') {
+    injectTsoaTagsDynamically(schema.additionalProperties);
+  }
 
   // BUBBLING : Remonter les règles des .nullable() vers le parent
   if (Array.isArray(schema.anyOf)) {
@@ -37,7 +41,7 @@ function injectTsoaTagsDynamically(schema: any) {
       // On isole le sous-schéma qui contient les vraies règles (on ignore le null)
       if (subSchema.type !== 'null') {
         // On copie les règles cachées vers le parent
-        ['minLength', 'maxLength', 'minimum', 'maximum', 'pattern', 'exclusiveMinimum'].forEach(rule => {
+        ['minLength', 'maxLength', 'minimum', 'maximum', 'pattern', 'exclusiveMinimum', 'minItems', 'maxItems'].forEach(rule => {
           if (subSchema[rule] !== undefined) schema[rule] = subSchema[rule];
         });
 
@@ -55,14 +59,18 @@ function injectTsoaTagsDynamically(schema: any) {
 
   // Génération des tags jsdoc pour tsoa
   const tags: string[] = [];
-  ['minLength', 'maxLength', 'minimum', 'maximum', 'pattern'].forEach(rule => {
-    if (schema[rule] !== undefined) tags.push(`@${rule} ${schema[rule]}`);
+  ['minLength', 'maxLength', 'minimum', 'maximum', 'pattern', 'minItems', 'maxItems'].forEach(rule => {
+    if (schema[rule] !== undefined) {
+      tags.push(`@${rule} ${schema[rule]}`);
+      delete schema[rule]; // Fix pour les Tuples (Non supporté)
+    }
   });
 
-  // Conversion Zod exclusiveMinimum (utilisé par .positive()) -> TSOA minimum
+  // Conversion Zod exclusiveMinimum -> TSOA minimum
   if (schema.exclusiveMinimum !== undefined && schema.minimum === undefined) {
     const isInt = schema.type === 'integer' || schema._isInteger;
     tags.push(`@minimum ${isInt ? schema.exclusiveMinimum + 1 : schema.exclusiveMinimum}`);
+    delete schema.exclusiveMinimum; // Fix pour les Tuples
   }
 
   if (schema.type === 'integer' || schema._isInteger) tags.push('@isInt');

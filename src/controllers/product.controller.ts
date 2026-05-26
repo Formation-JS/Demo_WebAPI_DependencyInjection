@@ -25,6 +25,7 @@ export class ProductController {
   public async Add(
     @Body() productData: Omit<ProductSchemaType, 'id'>
   ): Promise<ProductSchemaType> {
+    console.log(productData);
     throw new Error('Not implemented');
   }
 }

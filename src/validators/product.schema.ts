@@ -1,7 +1,9 @@
 import { z } from "zod";
+import { DeliverySchema } from './delivery.schema';
+import { CategorySchema } from './category.schema';
 
 // Exemple de schema
-export const productSchema = z.object({
+export const ProductSchema = z.object({
   id: z
     .uuid()
     .describe('L\'identifiant unique de l\'objet'),
@@ -35,4 +37,12 @@ export const productSchema = z.object({
   isFood: z
     .boolean({ error: 'La valeur "food" doit être un booléen' })
     .describe('Booléen pour de l\'alimentaire'),
+  categories: z
+    .array(CategorySchema)
+    .min(1, {error: 'Une categorie minimum'})
+    .describe('Categories du produit'),
+  deliveries: z
+    .record(z.string(), z.array(DeliverySchema))
+    .nullish()
+    .describe('Condionnements du produit')
 });
