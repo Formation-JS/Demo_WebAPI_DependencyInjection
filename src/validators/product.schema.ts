@@ -44,5 +44,5 @@ export const ProductSchema = z.object({
   deliveries: z
     .record(z.string(), z.array(DeliverySchema))
     .nullish()
-    .describe('Condionnements du produit')
+    .describe('Condionnements du produit'),    
 });

@@ -1,7 +1,7 @@
+import z, { ZodType } from 'zod';
 import { compile } from 'json-schema-to-typescript';
 import fs from 'fs';
 import path from 'path';
-import { ZodType } from 'zod';
 
 const validatorFolder = path.join(__dirname, "./validators");
 
@@ -28,6 +28,7 @@ function injectTsoaTagsDynamically(schema: any) {
   }
 
   // Parcours sécurisé des noeuds schémas
+  if (schema.definitions) Object.values(schema.definitions).forEach(injectTsoaTagsDynamically);
   if (schema.properties) Object.values(schema.properties).forEach(injectTsoaTagsDynamically);
   if (schema.items) injectTsoaTagsDynamically(schema.items);
   if (schema.anyOf) schema.anyOf.forEach(injectTsoaTagsDynamically);
@@ -100,6 +101,7 @@ async function generateModels() {
 
   // Récuperation des modules de schema Zod
   const files = fs.readdirSync(validatorFolder).filter(f => f.endsWith(".schema.ts"));
+  const globalRegistry: Record<string, ZodType> = {};
 
   for (const file of files) {
     // Import du module
@@ -108,32 +110,92 @@ async function generateModels() {
 
     // Parcours des exports nommés du module
     for (const exportName of Object.keys(validatorModule)) {
-      const validatorSchema = validatorModule[exportName] as ZodType;
-
-      // Conversion du schema en JSON Schema
-      // Alternative en Zod v3 : Utiliser le package "zod-to-json-schema"
-      const jsonSchema = validatorSchema.toJSONSchema({
-        unrepresentable: "any"
-      });
-      injectTsoaTagsDynamically(jsonSchema);
-
-      // Generation d'une interface TS avec JSDoc
+      // Définition du nom du typages
       const [initialName, ...restName] = exportName.split('');
-      const typeName = `${initialName.toUpperCase()}${restName.join('')}Type`;
-      const tsCode = await compile(jsonSchema as any, typeName, {
-        additionalProperties: false, // Stricte par défaut
-        bannerComment: '/* \n * Fichier généré automatiquement depuis Zod.\n * NE PAS MODIFIER MANUELLEMENT.\n */',
-        style: { semi: true, singleQuote: true, tabWidth: 4 }
-      });
+      let typeName = `${initialName.toUpperCase()}${restName.join('')}`;
+      typeName = typeName.replace('Schema', 'SchemaType');
 
-      // Sauvegarde dans le dossier "generated" de TSOA
-      const fileTypeName = `${typeName}.ts`;
-      fs.writeFileSync(path.join(outDir, fileTypeName), tsCode);
-
-      console.log(` - ${typeName} généré`);
+      // Enregistrement des schemas dans le schema global
+      globalRegistry[typeName] = validatorModule[exportName] as ZodType;
     }
   }
-  console.log("Génération terminé avec succès dans /generated/types !");
+
+  // Création du schema global
+  const rootSchema = z.object(globalRegistry);
+
+  // Génération du json en concervant les liens entre les schemas (Utilisation du "ref")
+  let jsonSchema: Record<string, any> = rootSchema.toJSONSchema({
+    unrepresentable: "any",
+    reused: "ref"
+  });
+
+  // Restructuration du json pour correspondre à la syntaxe TS
+  let schemaStr = JSON.stringify(jsonSchema);
+  schemaStr = schemaStr.replace(/#\/\$defs\//g, '#/definitions/');
+  jsonSchema = JSON.parse(schemaStr);
+
+  jsonSchema.definitions = jsonSchema.$defs || {};
+  delete jsonSchema.$defs;
+
+  const defsToRename: Record<string, string> = {};
+
+  if (jsonSchema.properties) {
+    for (const [modelName, propSchema] of Object.entries(jsonSchema.properties)) {
+      if ((propSchema as any).$ref) {
+        // Ce modèle est utilisé ailleurs, Zod l'a mis dans definitions sous un faux nom
+        const oldDefName = (propSchema as any).$ref.split('/').pop();
+        defsToRename[oldDefName] = modelName;
+      } else {
+        // Modèle unique : on le déplace manuellement dans les definitions
+        jsonSchema.definitions[modelName] = propSchema;
+      }
+      // L'interface racine ne contient plus QUE des pointeurs ($ref)
+      (jsonSchema.properties as any)[modelName] = { $ref: `#/definitions/${modelName}` };
+    }
+  }
+
+  // Detection des definitions (ex: array) qui n'ont été pas reprit dans le renommage
+  let anonymousCount = 1;
+  for (const [defName, defContent] of Object.entries(jsonSchema.definitions)) {
+    if (!defsToRename[defName] && /^_{0,2}schema\d+$/.test(defName)) {
+      
+      // Ajoute au dictionnaire de renommage global
+      defsToRename[defName] = `AnonymousType__${anonymousCount++}`;
+    }
+  }
+
+  // Renommage textuel global des références internes
+  schemaStr = JSON.stringify(jsonSchema);
+  for (const [oldDef, newDef] of Object.entries(defsToRename)) {
+    schemaStr = schemaStr.replace(new RegExp(`#/definitions/${oldDef}(?=[^a-zA-Z0-9_-]|$)`, 'g'), `#/definitions/${newDef}`);
+  }
+  jsonSchema = JSON.parse(schemaStr);
+
+  // Renommage réel des clés dans l'objet definitions
+  for (const [oldDef, newDef] of Object.entries(defsToRename)) {
+    if (jsonSchema.definitions[oldDef]) {
+      jsonSchema.definitions[newDef] = jsonSchema.definitions[oldDef];
+      delete jsonSchema.definitions[oldDef];
+    }
+  }
+
+  // Injection des tags necessaires pour TSOA
+  injectTsoaTagsDynamically(jsonSchema);
+
+  // Generation des interfaces TS avec JSDoc
+  let tsCode = await compile(jsonSchema as any, 'IGNORE_ME_ROOT', {
+    additionalProperties: false,
+    bannerComment: '/* \n * Fichier généré automatiquement depuis Zod.\n * NE PAS MODIFIER MANUELLEMENT.\n */',
+    style: { semi: true, singleQuote: true, tabWidth: 4 }
+  });
+
+  // Nettoyage de l'interface généré pour schéma "rootSchema"
+  tsCode = tsCode.replace(/export interface IGNORE_ME_ROOT\s*\{[^}]*\}/, '').trim();
+
+  // Sauvegarde dans le dossier "generated" de TSOA
+  const filenameGenerated = path.join(outDir, 'models.ts');
+  fs.writeFileSync(filenameGenerated, tsCode);
+  console.log(`Fichier généré : ${filenameGenerated}`);
 }
 
 generateModels().catch(console.error);

@@ -1,5 +1,5 @@
 import { Body, Get, Path, Post, Route } from 'tsoa';
-import { ProductSchemaType } from '../generated/types/ProductSchemaType';
+import { ProductSchemaType } from '../generated/types/models';
 
 @Route('/product')
 export class ProductController {
