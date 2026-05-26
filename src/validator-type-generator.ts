@@ -91,11 +91,12 @@ function injectTsoaTagsDynamically(schema: any) {
 async function generateModels() {
   console.log("Génération des modèles TypeScript depuis Zod");
 
-  // Création de répértoire de typage généré
+  // Répértoire de typage généré
   const outDir = path.join(__dirname, './generated/types');
-  if (!fs.existsSync(outDir)) {
-    fs.mkdirSync(outDir, { recursive: true });
+  if (fs.existsSync(outDir)) {
+    fs.rmSync(outDir, { recursive: true, force: true });
   }
+  fs.mkdirSync(outDir, { recursive: true });
 
   // Récuperation des modules de schema Zod
   const files = fs.readdirSync(validatorFolder).filter(f => f.endsWith(".schema.ts"));
