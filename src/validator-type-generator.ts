@@ -126,7 +126,8 @@ async function generateModels() {
   // Génération du json en concervant les liens entre les schemas (Utilisation du "ref")
   let jsonSchema: Record<string, any> = rootSchema.toJSONSchema({
     unrepresentable: "any",
-    reused: "ref"
+    reused: "ref",
+    cycles: "ref"
   });
 
   // Restructuration du json pour correspondre à la syntaxe TS
