@@ -45,4 +45,11 @@ export const ProductSchema = z.object({
     .record(z.string(), z.array(DeliverySchema))
     .nullish()
     .describe('Condionnements du produit'),    
+  tva: z
+    .enum(['NORMAL', 'INTERMEDIATE', 'REDUCED', 'ZERO'])
+    .describe('Type de TVA'),
+  ageRestriction: z
+    .enum(['+3', '+8', '+12', '+16', '+18'])
+    .optional()
+    .describe('Restrictions d\'âge')
 });
