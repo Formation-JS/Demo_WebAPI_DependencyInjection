@@ -113,7 +113,7 @@ async function generateModels() {
       // Définition du nom du typages
       const [initialName, ...restName] = exportName.split('');
       let typeName = `${initialName.toUpperCase()}${restName.join('')}`;
-      typeName = typeName.replace('Schema', 'SchemaType');
+      typeName = typeName.replace(/(Schema)?$/, 'Dto');
 
       // Enregistrement des schemas dans le schema global
       globalRegistry[typeName] = validatorModule[exportName] as ZodType;
@@ -161,7 +161,7 @@ async function generateModels() {
     if (!defsToRename[defName] && /^_{0,2}schema\d+$/.test(defName)) {
       
       // Ajoute au dictionnaire de renommage global
-      defsToRename[defName] = `AnonymousType__${anonymousCount++}`;
+      defsToRename[defName] = `AnonymousDto__${anonymousCount++}`;
     }
   }
 

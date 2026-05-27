@@ -1,5 +1,5 @@
 import { Body, Get, Path, Post, Route } from 'tsoa';
-import { ProductSchemaType } from '../generated/types/models';
+import { ProductDto } from '../generated/types/models';
 
 @Route('/product')
 export class ProductController {
@@ -10,21 +10,21 @@ export class ProductController {
   // Définition des routes avec le décorateur
   @Get()
   public async GetAll(
-  ): Promise<ProductSchemaType[]> {
+  ): Promise<ProductDto[]> {
     throw new Error('Not implemented');
   }
 
   @Get('/:id')
   public async GetById(
     @Path() id: string
-  ): Promise<ProductSchemaType> {
+  ): Promise<ProductDto> {
     throw new Error('Not implemented');
   }
 
   @Post()
   public async Add(
-    @Body() productData: Omit<ProductSchemaType, 'id'>
-  ): Promise<ProductSchemaType> {
+    @Body() productData: Omit<ProductDto, 'id'>
+  ): Promise<ProductDto> {
     console.log(productData);
     throw new Error('Not implemented');
   }
