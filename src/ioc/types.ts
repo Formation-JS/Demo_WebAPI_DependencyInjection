@@ -7,5 +7,6 @@ export const IOC_TYPES = {
     PreconfigMiddleware: Symbol.for('PreconfigMiddleware'),
 
     // Services
-    TotoService: Symbol.for("TotoService"),
+    ExampleService: Symbol.for("ExampleService"),
+    ProductService: Symbol.for("ProductService")
 }

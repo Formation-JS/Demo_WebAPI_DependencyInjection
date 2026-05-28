@@ -1,12 +1,12 @@
 import { inject, injectable } from "inversify";
 import { LoggerService } from '../../shared/utils/logger.service';
 
-export interface ITotoService {
+export interface IExampleService {
     sayHello(name: string): string;
 }
 
 @injectable()
-export class TotoService implements ITotoService {
+export class ExampleService implements IExampleService {
 
     constructor(
         @inject(LoggerService) private loggerService: LoggerService

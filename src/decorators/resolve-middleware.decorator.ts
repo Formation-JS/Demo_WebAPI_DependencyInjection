@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction, RequestHandler } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { iocContainer as container } from '../ioc/container';
 import { Middlewares } from 'tsoa';
 

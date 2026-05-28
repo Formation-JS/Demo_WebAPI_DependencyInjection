@@ -1,6 +1,6 @@
 import { inject, injectable } from "inversify";
 import { IOC_TYPES } from "../ioc/types";
-import { ITotoService } from '../domains/toto/toto.service';
+import { IExampleService } from '../domains/example/example.service';
 import { UseMiddleware } from '../decorators/use-middleware.decorator';
 import { ExampleBuilderMiddleware } from '../middlewares/example-builder.middleware';
 import { Get, Middlewares, Path, Route } from 'tsoa';
@@ -11,7 +11,7 @@ export class HomeController {
 
     // Injection de dépendance via le constructeur
     constructor(
-        @inject(IOC_TYPES.TotoService) private totoService: ITotoService
+        @inject(IOC_TYPES.ExampleService) private exampleService: IExampleService
     ) { }
 
     // Définition des routes avec le décorateur
@@ -25,7 +25,7 @@ export class HomeController {
 
     @Get('/name/:id')
     public async sayHelloName(@Path() id: string): Promise<{ message: string; }> {
-        const message = this.totoService.sayHello(id);
+        const message = this.exampleService.sayHello(id);
         return { message };
     }
 

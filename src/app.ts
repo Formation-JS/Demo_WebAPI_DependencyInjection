@@ -9,6 +9,7 @@ import './inversify.config';
 // Fichiers générés par TSOA
 import { RegisterRoutes } from "./generated/routes";
 import swaggerDocument from "./generated/swagger.json";
+import { NotFoundError } from './shared/errors/not-found.error';
 
 
 
@@ -34,8 +35,16 @@ const webapi = async () => {
     })
   );
 
-  const errorMiddleware : ErrorRequestHandler = (error, req, res, next) => {
-    
+  const errorMiddleware: ErrorRequestHandler = (error, req, res, next) => {
+
+    // Erreurs 404
+    if (error instanceof NotFoundError) {
+      res.status(404).json({
+        message: error.message
+      });
+      return;
+    }
+
     // Erreurs de validation TSOA
     if (error instanceof ValidateError) {
       console.warn('[Validation Error]', error);
