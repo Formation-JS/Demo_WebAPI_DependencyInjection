@@ -9,4 +9,7 @@ export const DeliverySchema = z.object({
     .min(3, { error: 'Le nom doit contenir minimum 3 caracteres !' })
     .max(50, { error: 'Le nom doit contenir maximum 50 caracteres !' })
     .describe('Le nom du conditionnement'),
+  priority: z
+    .enum(['STANDARD', 'EXPRESS', 'URGENT'])
+    .default('STANDARD')
 });

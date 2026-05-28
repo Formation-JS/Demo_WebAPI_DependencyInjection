@@ -42,7 +42,7 @@ function injectTsoaTagsDynamically(schema: any) {
       // On isole le sous-schéma qui contient les vraies règles (on ignore le null)
       if (subSchema.type !== 'null') {
         // On copie les règles cachées vers le parent
-        ['minLength', 'maxLength', 'minimum', 'maximum', 'pattern', 'exclusiveMinimum', 'minItems', 'maxItems'].forEach(rule => {
+        ['minLength', 'maxLength', 'minimum', 'maximum', 'pattern', 'exclusiveMinimum', 'minItems', 'maxItems', 'default'].forEach(rule => {
           if (subSchema[rule] !== undefined) schema[rule] = subSchema[rule];
         });
 
@@ -78,6 +78,16 @@ function injectTsoaTagsDynamically(schema: any) {
   if (schema.format === 'email') tags.push('@isEmail');
   if (schema.format === 'date-time' && schema.tsType !== 'Date' && !schema._isDate) {
     tags.push('@isDateTime\n@format date-time');
+  }
+
+  // Gestion des valeurs par défaut
+  if (schema.default !== undefined) {
+    // Ajout de guillemets pour les valeur de type string
+    const defaultVal = typeof schema.default === 'string' ? `"${schema.default}"` : schema.default;
+    tags.push(`@default ${defaultVal}`);
+
+    // Suppression du schéma pour évité les doublons
+    delete schema.default; 
   }
 
   //! Injection finale dans la description existante (en évitant les doublons)
