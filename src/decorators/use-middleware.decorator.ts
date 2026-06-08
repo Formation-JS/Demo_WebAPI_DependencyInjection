@@ -13,7 +13,6 @@ const middlewareCache = new Map<string, symbol>();
 
 // Décorateur pour exploiter les middlewares avec l'injection de dépendence de Inversify.
 export function UseMiddleware(builder: MiddlewareBuilder, config: any) {
-
   // Clef de hashage pour identifier le middleware (Optimisation)
   const cacheKey = `${builder.name || 'AnonymousBuilder'}-${hash(config)}`;
 
@@ -22,13 +21,12 @@ export function UseMiddleware(builder: MiddlewareBuilder, config: any) {
 
   // Enregistrement du middleware à la volé
   if (!middlewareSymbol) {
-
     // Création du symbole
     middlewareSymbol = Symbol.for(cacheKey);
 
     // Middleware à injecter dans le container
     const middlewareAdapter = {
-        execute: builder(config)
+      execute: builder(config),
     };
 
     // Ajout du middleware dans le mecanisme d'injection de dépendence

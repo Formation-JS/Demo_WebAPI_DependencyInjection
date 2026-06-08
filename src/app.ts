@@ -1,5 +1,5 @@
-import "reflect-metadata";
-import express, { ErrorRequestHandler } from "express";
+import 'reflect-metadata';
+import express, { ErrorRequestHandler } from 'express';
 import { apiReference } from '@scalar/express-api-reference';
 import { ValidateError } from 'tsoa';
 
@@ -7,11 +7,9 @@ import { ValidateError } from 'tsoa';
 import './inversify.config';
 
 // Fichiers générés par TSOA
-import { RegisterRoutes } from "./generated/routes";
-import swaggerDocument from "./generated/swagger.json";
+import { RegisterRoutes } from './generated/routes';
+import swaggerDocument from './generated/swagger.json';
 import { NotFoundError } from './shared/errors/not-found.error';
-
-
 
 const webapi = async () => {
   const app = express();
@@ -36,11 +34,10 @@ const webapi = async () => {
   );
 
   const errorMiddleware: ErrorRequestHandler = (error, req, res, next) => {
-
     // Erreurs 404
     if (error instanceof NotFoundError) {
       res.status(404).json({
-        message: error.message
+        message: error.message,
       });
       return;
     }
@@ -50,7 +47,7 @@ const webapi = async () => {
       console.warn('[Validation Error]', error);
       res.status(422).json({
         message: 'Erreur de validation des données',
-        details: error?.fields
+        details: error?.fields,
       });
       return;
     }

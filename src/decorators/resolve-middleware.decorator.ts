@@ -4,7 +4,6 @@ import { Middlewares } from 'tsoa';
 
 // Lien entre TSOA et Inversify
 export function ResolveMiddleware(symbol: symbol): ClassDecorator & MethodDecorator {
-
   const middlewareIOC = (req: Request, res: Response, next: NextFunction) => {
     const middleware = container.get<any>(symbol);
 

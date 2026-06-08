@@ -213,7 +213,9 @@ async function generateModels() {
         jsonSchema.definitions[modelName] = propSchema;
       }
       //* L'interface racine ne contient plus que des $ref
-      (jsonSchema.properties as any)[modelName] = { $ref: `#/definitions/${modelName}` };
+      (jsonSchema.properties as any)[modelName] = {
+        $ref: `#/definitions/${modelName}`,
+      };
     }
   }
 
