@@ -17,5 +17,9 @@ export const DeliverySchema = z.object({
     .number()
     .nonnegative()
     .default(0)
-    .describe('Frais supplémentaire')
+    .describe('Frais supplémentaire'),
+  address: z
+    .string()
+    .min(3, { error: 'Le nom doit contenir minimum 3 caracteres !' })
+    .max(50, { error: 'Le nom doit contenir maximum 50 caracteres !' }),
 });

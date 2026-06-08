@@ -10,5 +10,5 @@ export const CategorySchema: z.ZodType<any> = z.object({
   subCategories: z
     .array(z.lazy(() => CategorySchema))
     .describe('Sous catégories (Recursive)')
-    .optional()
+    .optional(),
 });

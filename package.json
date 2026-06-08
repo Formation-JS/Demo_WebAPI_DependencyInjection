@@ -8,12 +8,14 @@
   "main": "src/app.ts",
   "scripts": {
     "generate:models": "node -r @swc-node/register ./src/validator-type-generator.ts",
+    "generate:models:watch": "node -r @swc-node/register ./src/validator-type-generator.ts --watch",
     "tsoa": "tsoa spec-and-routes",
     "prebuild": "npm run generate:models && npm run tsoa",
     "build": "tsc",
     "start": "node dist/app.js",
     "predev": "npm run generate:models && npm run tsoa",
-    "dev": "node --watch -r @swc-node/register ./src/app.ts"
+    "dev": "node --watch -r @swc-node/register ./src/app.ts",
+    "format": "dprint fmt"
   },
   "dependencies": {
     "@scalar/express-api-reference": "^0.9.14",
@@ -29,6 +31,7 @@
     "@swc-node/register": "^1.11.1",
     "@types/express": "^5.0.6",
     "@types/object-hash": "^3.0.6",
+    "dprint": "^0.54.0",
     "json-schema-to-typescript": "^15.0.4",
     "typescript": "^5.9.3"
   }

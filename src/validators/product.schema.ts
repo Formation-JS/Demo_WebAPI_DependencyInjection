@@ -1,6 +1,6 @@
-import { z } from "zod";
+import { z } from 'zod';
+import { CategorySchema } from './category/category.schema';
 import { DeliverySchema } from './delivery.schema';
-import { CategorySchema } from './category.schema';
 
 // Exemple de schema
 export const ProductSchema = z.object({
@@ -23,14 +23,14 @@ export const ProductSchema = z.object({
     .min(0, { error: 'Le prix doit être positif' })
     .describe('Le prix du produit'),
   stockQuantity: z
-    .number({ error: "Le quantité du stock doit être un nombre" })
-    .int({ error: "Le quantité du stock doit être un entier" })
-    .nonnegative({ error: "Le quantité du stock ne peut pas être negative" })
+    .number({ error: 'Le quantité du stock doit être un nombre' })
+    .int({ error: 'Le quantité du stock doit être un entier' })
+    .nonnegative({ error: 'Le quantité du stock ne peut pas être negative' })
     .describe('Le stock actuel du produit'),
-  releaseDate: z.coerce
+  releaseDate: z.coerce //
     .date({ error: 'La date de sortie doit être valide' })
     .describe('La date de sortie'),
-  restockDate: z.coerce
+  restockDate: z.coerce //
     .date({ error: 'La date de réassort doit être valide' })
     .optional()
     .describe('La date de réassort'),
@@ -39,17 +39,17 @@ export const ProductSchema = z.object({
     .describe('Booléen pour de l\'alimentaire'),
   categories: z
     .array(CategorySchema)
-    .min(1, {error: 'Une categorie minimum'})
+    .min(1, { error: 'Une categorie minimum' })
     .describe('Categories du produit'),
   deliveries: z
     .record(z.string(), z.array(DeliverySchema))
     .nullish()
-    .describe('Condionnements du produit'),    
+    .describe('Condionnements du produit'),
   tva: z
     .enum(['NORMAL', 'INTERMEDIATE', 'REDUCED', 'ZERO'])
     .describe('Type de TVA'),
   ageRestriction: z
     .enum(['+3', '+8', '+12', '+16', '+18'])
     .optional()
-    .describe('Restrictions d\'âge')
+    .describe('Restrictions d\'âge'),
 });

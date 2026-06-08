@@ -1,8 +1,7 @@
-import { injectable } from "inversify";
+import { injectable } from 'inversify';
 
 @injectable()
 export class LoggerService {
-
   public log(message: string) {
     console.log(`[LOG] ${new Date().toISOString()} : ${message}`);
   }
