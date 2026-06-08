@@ -1,6 +1,6 @@
 import 'reflect-metadata';
-import express, { ErrorRequestHandler } from 'express';
 import { apiReference } from '@scalar/express-api-reference';
+import express, { ErrorRequestHandler } from 'express';
 import { ValidateError } from 'tsoa';
 
 // Configuration de Inversify
@@ -30,7 +30,7 @@ const webapi = async () => {
         content: swaggerDocument,
       },
       theme: 'elysiajs',
-    })
+    }),
   );
 
   const errorMiddleware: ErrorRequestHandler = (error, req, res, next) => {

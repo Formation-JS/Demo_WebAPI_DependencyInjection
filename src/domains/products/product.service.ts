@@ -1,6 +1,6 @@
 import { injectable } from 'inversify';
-import { Product } from './product.entity';
 import { NotFoundError } from '../../shared/errors/not-found.error';
+import { Product } from './product.entity';
 
 export interface IProductService {
   insert(product: Product): Promise<string>;
@@ -23,7 +23,7 @@ export class ProductService implements IProductService {
   }
 
   async delete(id: string): Promise<void> {
-    const targetIndex = this.products.findIndex(p => p.id === id);
+    const targetIndex = this.products.findIndex((p) => p.id === id);
 
     if (targetIndex === -1) {
       throw new NotFoundError('Product not exists');
@@ -36,7 +36,7 @@ export class ProductService implements IProductService {
   }
 
   async getById(id: string): Promise<Product> {
-    const product = this.products.find(p => p.id === id);
+    const product = this.products.find((p) => p.id === id);
 
     if (!product) {
       throw new NotFoundError('Product not exists');

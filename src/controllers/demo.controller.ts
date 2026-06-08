@@ -1,10 +1,10 @@
 import { inject, injectable } from 'inversify';
-import { IOC_TYPES } from '../ioc/types';
-import { IExampleService } from '../domains/example/example.service';
-import { UseMiddleware } from '../decorators/use-middleware.decorator';
-import { ExampleBuilderMiddleware } from '../middlewares/example-builder.middleware';
 import { Get, Middlewares, Path, Route } from 'tsoa';
 import { ResolveMiddleware } from '../decorators/resolve-middleware.decorator';
+import { UseMiddleware } from '../decorators/use-middleware.decorator';
+import { IExampleService } from '../domains/example/example.service';
+import { IOC_TYPES } from '../ioc/types';
+import { ExampleBuilderMiddleware } from '../middlewares/example-builder.middleware';
 
 @Route('/demo')
 export class HomeController {
@@ -20,7 +20,7 @@ export class HomeController {
   }
 
   @Get('/name/:id')
-  public async sayHelloName(@Path() id: string): Promise<{ message: string }> {
+  public async sayHelloName(@Path() id: string): Promise<{ message: string; }> {
     const message = this.exampleService.sayHello(id);
     return { message };
   }
@@ -37,7 +37,7 @@ export class HomeController {
   @ResolveMiddleware(IOC_TYPES.ExampleMiddleware)
   public async getMiddleware() {
     return {
-      message: "Route qui utilise un middleware liée à l'ioc de Inversify !",
+      message: 'Route qui utilise un middleware liée à l\'ioc de Inversify !',
     };
   }
 

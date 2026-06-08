@@ -1,12 +1,12 @@
+import { HomeController } from './controllers/demo.controller';
+import { ProductController } from './controllers/product.controller';
+import { ExampleService, IExampleService } from './domains/example/example.service';
+import { IProductService, ProductService } from './domains/products/product.service';
 import { iocContainer as container } from './ioc/container';
 import { IOC_TYPES } from './ioc/types';
-import { IExampleService, ExampleService } from './domains/example/example.service';
-import { HomeController } from './controllers/demo.controller';
-import { ExampleClassMiddleware } from './middlewares/example-class.middleware';
 import { ExampleBuilderMiddleware } from './middlewares/example-builder.middleware';
-import { ProductController } from './controllers/product.controller';
+import { ExampleClassMiddleware } from './middlewares/example-class.middleware';
 import { LoggerService } from './shared/utils/logger.service';
-import { IProductService, ProductService } from './domains/products/product.service';
 
 // Binding des controllers
 container.bind(HomeController).toSelf().inSingletonScope();

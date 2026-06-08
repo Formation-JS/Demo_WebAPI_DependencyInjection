@@ -9,7 +9,7 @@ export class Product {
     tva: 'NORMAL' | 'INTERMEDIATE' | 'REDUCED' | 'ZERO',
     desc?: string,
     restockDate?: Date,
-    ageRestriction?: '+3' | '+8' | '+12' | '+16' | '+18'
+    ageRestriction?: '+3' | '+8' | '+12' | '+16' | '+18',
   ) {
     this.id = id;
     this.name = name;

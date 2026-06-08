@@ -1,9 +1,9 @@
-import { iocContainer as container } from '../ioc/container';
 import { RequestHandler } from 'express';
 import hash from 'object-hash';
+import { iocContainer as container } from '../ioc/container';
 import { ResolveMiddleware } from './resolve-middleware.decorator';
 
-//! Pattern pour utiliser des middlewares qui utilise un builder qui retourne un RequestHandler
+// ! Pattern pour utiliser des middlewares qui utilise un builder qui retourne un RequestHandler
 
 // Type des fonctions Builder
 export type MiddlewareBuilder = (config: any) => RequestHandler;

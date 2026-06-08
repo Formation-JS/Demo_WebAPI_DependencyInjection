@@ -15,7 +15,7 @@
     "start": "node dist/app.js",
     "predev": "npm run generate:models && npm run tsoa",
     "dev": "node --watch -r @swc-node/register ./src/app.ts",
-    "format": "prettier --write src/**/*.ts"
+    "format": "dprint fmt"
   },
   "dependencies": {
     "@scalar/express-api-reference": "^0.9.14",
@@ -31,8 +31,8 @@
     "@swc-node/register": "^1.11.1",
     "@types/express": "^5.0.6",
     "@types/object-hash": "^3.0.6",
+    "dprint": "^0.54.0",
     "json-schema-to-typescript": "^15.0.4",
-    "prettier": "^3.8.3",
     "typescript": "^5.9.3"
   }
 }

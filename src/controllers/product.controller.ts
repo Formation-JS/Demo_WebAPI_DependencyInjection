@@ -1,9 +1,9 @@
+import { inject } from 'inversify';
 import { Body, Delete, Get, Path, Post, Route } from 'tsoa';
+import { Product } from '../domains/products/product.entity';
+import { IProductService } from '../domains/products/product.service';
 import { ProductDto } from '../generated/types/models';
 import { IOC_TYPES } from '../ioc/types';
-import { inject } from 'inversify';
-import { IProductService } from '../domains/products/product.service';
-import { Product } from '../domains/products/product.entity';
 import { NotFoundError } from '../shared/errors/not-found.error';
 
 @Route('/product')

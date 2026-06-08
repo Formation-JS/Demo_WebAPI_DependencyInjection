@@ -30,13 +30,12 @@ function injectTsoaTagsDynamically(schema: any): string[] {
   // * Si le nœud est totalement vide `{}`, c'est que Zod l'a mis en "any".
   // * On le convertit à la volée en type string ISO pour TSOA.
   // * Alternative : Ajouter un tag "[Date]" dans la description pour le detecter
-  const isZodDateFallback =
-    (!schema.type || schema.type === 'object' || Array.isArray(schema.type)) &&
-    !schema.properties &&
-    !schema.anyOf &&
-    !schema.$ref &&
-    !schema.items &&
-    !schema.additionalProperties;
+  const isZodDateFallback = (!schema.type || schema.type === 'object' || Array.isArray(schema.type))
+    && !schema.properties
+    && !schema.anyOf
+    && !schema.$ref
+    && !schema.items
+    && !schema.additionalProperties;
 
   if (isZodDateFallback) {
     schema.type = 'string';
@@ -50,23 +49,23 @@ function injectTsoaTagsDynamically(schema: any): string[] {
   const bubbledTags: string[] = [];
 
   // BUBBLING : Remonter les règles des nullables (anyOf) ET des descriptions imbriquées (allOf)
-  ['anyOf', 'allOf'].forEach(group => {
+  ['anyOf', 'allOf'].forEach((group) => {
     if (Array.isArray(schema[group])) {
       schema[group].forEach((subSchema: any) => {
-        //* Ignore les sous-schémas ont un type null
+        // * Ignore les sous-schémas ont un type null
         if (subSchema.type !== 'null') {
-          //* Récuperation les tags générés par les sous-schémas
+          // * Récuperation les tags générés par les sous-schémas
           const subTags = injectTsoaTagsDynamically(subSchema);
 
-          //* Sauvegarde des tags trouvés
+          // * Sauvegarde des tags trouvés
           bubbledTags.push(...subTags);
 
-          //* Ajout d'un flag pour les entiers
+          // * Ajout d'un flag pour les entiers
           if (subSchema.type === 'integer') {
             schema._isInteger = true;
           }
 
-          //* Gestion du type date
+          // * Gestion du type date
           if (subSchema.format && subSchema.tsType !== 'Date' && !subSchema._isDate) {
             schema.format = subSchema.format;
           }
@@ -89,12 +88,14 @@ function injectTsoaTagsDynamically(schema: any): string[] {
 
   // Génération des tags pour le noeud
   const tags: string[] = [];
-  ['minLength', 'maxLength', 'minimum', 'maximum', 'pattern', 'minItems', 'maxItems'].forEach(rule => {
-    if (schema[rule] !== undefined) {
-      tags.push(`@${rule} ${schema[rule]}`);
-      delete schema[rule]; // Fix pour les Tuples (Non supporté)
-    }
-  });
+  ['minLength', 'maxLength', 'minimum', 'maximum', 'pattern', 'minItems', 'maxItems'].forEach(
+    (rule) => {
+      if (schema[rule] !== undefined) {
+        tags.push(`@${rule} ${schema[rule]}`);
+        delete schema[rule]; // Fix pour les Tuples (Non supporté)
+      }
+    },
+  );
 
   // Conversion des tags Zod en TSOA
   if (schema.type === 'integer' || schema._isInteger) tags.push('@isInt');
@@ -117,11 +118,11 @@ function injectTsoaTagsDynamically(schema: any): string[] {
 
   // Gestion des valeurs par défaut
   if (schema.default !== undefined) {
-    //* Ajout de guillemets pour les valeur de type string
+    // * Ajout de guillemets pour les valeur de type string
     const defaultVal = typeof schema.default === 'string' ? `"${schema.default}"` : schema.default;
     tags.push(`@default ${defaultVal}`);
 
-    //* Suppression du schéma pour évité les doublons
+    // * Suppression du schéma pour évité les doublons
     delete schema.default;
   }
 
@@ -142,7 +143,7 @@ async function generateModels() {
   let numberOfModels = 0;
 
   // Vider le cache de require/import pour forcer Node à relire les fichiers .schema.ts modifiés en mode watch
-  Object.keys(require.cache).forEach(key => {
+  Object.keys(require.cache).forEach((key) => {
     if (key.includes('/validators/')) {
       delete require.cache[key];
     }
@@ -155,21 +156,21 @@ async function generateModels() {
   fs.mkdirSync(outDir, { recursive: true });
 
   // Récuperation des modules de schema Zod
-  const files = deepGetDirectories(validatorFolder, f => f.endsWith('.schema.ts'));
+  const files = deepGetDirectories(validatorFolder, (f) => f.endsWith('.schema.ts'));
   const globalRegistry: Record<string, ZodType> = {};
 
   for (const file of files) {
-    //* Import du module
+    // * Import du module
     const validatorModule = await import(file);
 
-    //* Parcours des exports nommés du module
+    // * Parcours des exports nommés du module
     for (const exportName of Object.keys(validatorModule)) {
-      //* Définition du nom du typages
+      // * Définition du nom du typages
       const [initialName, ...restName] = exportName.split('');
       let typeName = `${initialName.toUpperCase()}${restName.join('')}`;
       typeName = typeName.replace(/(Schema)?$/, 'Dto');
 
-      //* Enregistrement des schemas dans le schema global
+      // * Enregistrement des schemas dans le schema global
       globalRegistry[typeName] = validatorModule[exportName] as ZodType;
       numberOfModels++;
     }
@@ -205,14 +206,14 @@ async function generateModels() {
   if (jsonSchema.properties) {
     for (const [modelName, propSchema] of Object.entries(jsonSchema.properties)) {
       if ((propSchema as any).$ref) {
-        //* Modèle utilisé : Zod l'a mis dans definitions
+        // * Modèle utilisé : Zod l'a mis dans definitions
         const oldDefName = (propSchema as any).$ref.split('/').pop();
         defsToRename[oldDefName] = modelName;
       } else {
-        //* Modèle unique : Déplacement manuellement dans les definitions
+        // * Modèle unique : Déplacement manuellement dans les definitions
         jsonSchema.definitions[modelName] = propSchema;
       }
-      //* L'interface racine ne contient plus que des $ref
+      // * L'interface racine ne contient plus que des $ref
       (jsonSchema.properties as any)[modelName] = {
         $ref: `#/definitions/${modelName}`,
       };
@@ -247,15 +248,15 @@ async function generateModels() {
     seen.add(obj);
 
     if (Array.isArray(obj)) {
-      obj.forEach(item => inlineAnonymousRefs(item, seen));
+      obj.forEach((item) => inlineAnonymousRefs(item, seen));
       return;
     }
-    Object.values(obj).forEach(val => inlineAnonymousRefs(val, seen));
+    Object.values(obj).forEach((val) => inlineAnonymousRefs(val, seen));
 
     if (obj.$ref && typeof obj.$ref === 'string' && obj.$ref.startsWith('#/definitions/')) {
       const refName = obj.$ref.split('/').pop() as string;
 
-      //* Utilisation du "rootDefNames" pour conserver les définitions principal
+      // * Utilisation du "rootDefNames" pour conserver les définitions principal
       if (!rootDefNames.has(refName) && jsonSchema.definitions[refName]) {
         const defContent = jsonSchema.definitions[refName];
 
@@ -283,7 +284,8 @@ async function generateModels() {
   // Generation des interfaces TS avec JSDoc
   let tsCode = await compile(jsonSchema as any, 'IGNORE_ME_ROOT', {
     additionalProperties: false,
-    bannerComment: '/* \n * Fichier généré automatiquement depuis Zod.\n * NE PAS MODIFIER MANUELLEMENT.\n */',
+    bannerComment:
+      '/* \n * Fichier généré automatiquement depuis Zod.\n * NE PAS MODIFIER MANUELLEMENT.\n */',
     style: { semi: true, singleQuote: true, tabWidth: 4 },
   });
 
@@ -305,7 +307,9 @@ async function start() {
   await generateModels();
 
   if (isWatchMode) {
-    console.log(`\x1b[35m[Watch Mode] 👀 Surveillance active sur le dossier : ${validatorFolder}\x1b[0m`);
+    console.log(
+      `\x1b[35m[Watch Mode] 👀 Surveillance active sur le dossier : ${validatorFolder}\x1b[0m`,
+    );
 
     let debounceTimeout: NodeJS.Timeout | null = null;
 

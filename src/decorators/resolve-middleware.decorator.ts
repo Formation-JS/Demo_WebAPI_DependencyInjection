@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from 'express';
-import { iocContainer as container } from '../ioc/container';
+import { NextFunction, Request, Response } from 'express';
 import { Middlewares } from 'tsoa';
+import { iocContainer as container } from '../ioc/container';
 
 // Lien entre TSOA et Inversify
 export function ResolveMiddleware(symbol: symbol): ClassDecorator & MethodDecorator {
