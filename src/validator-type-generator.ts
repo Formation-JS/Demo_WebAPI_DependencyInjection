@@ -3,7 +3,7 @@ import { compile } from 'json-schema-to-typescript';
 import fs from 'fs';
 import path from 'path';
 
-const validatorFolder = path.join(__dirname, "./validators");
+const validatorFolder = path.join(__dirname, './validators');
 
 function injectTsoaTagsDynamically(schema: any): string[] {
   if (!schema || typeof schema !== 'object') return [];
@@ -13,12 +13,12 @@ function injectTsoaTagsDynamically(schema: any): string[] {
   // * On le convertit à la volée en type string ISO pour TSOA.
   // * Alternative : Ajouter un tag "[Date]" dans la description pour le detecter
   const isZodDateFallback =
-    (!schema.type || schema.type === 'object' || Array.isArray(schema.type))
-    && !schema.properties
-    && !schema.anyOf
-    && !schema.$ref
-    && !schema.items
-    && !schema.additionalProperties;
+    (!schema.type || schema.type === 'object' || Array.isArray(schema.type)) &&
+    !schema.properties &&
+    !schema.anyOf &&
+    !schema.$ref &&
+    !schema.items &&
+    !schema.additionalProperties;
 
   if (isZodDateFallback) {
     schema.type = 'string';
@@ -35,10 +35,8 @@ function injectTsoaTagsDynamically(schema: any): string[] {
   ['anyOf', 'allOf'].forEach(group => {
     if (Array.isArray(schema[group])) {
       schema[group].forEach((subSchema: any) => {
-
         //* Ignore les sous-schémas ont un type null
         if (subSchema.type !== 'null') {
-
           //* Récuperation les tags générés par les sous-schémas
           const subTags = injectTsoaTagsDynamically(subSchema);
 
@@ -122,7 +120,7 @@ function injectTsoaTagsDynamically(schema: any): string[] {
 
 // Générateur de type basé sur les schemas Zod
 async function generateModels() {
-  console.log("Génération des modèles TypeScript depuis Zod");
+  console.log('Génération des modèles TypeScript depuis Zod');
 
   // Répértoire de typage généré
   const outDir = path.join(__dirname, './generated/types');
@@ -132,7 +130,7 @@ async function generateModels() {
   fs.mkdirSync(outDir, { recursive: true });
 
   // Récuperation des modules de schema Zod
-  const files = fs.readdirSync(validatorFolder).filter(f => f.endsWith(".schema.ts"));
+  const files = fs.readdirSync(validatorFolder).filter(f => f.endsWith('.schema.ts'));
   const globalRegistry: Record<string, ZodType> = {};
 
   for (const file of files) {
@@ -157,9 +155,9 @@ async function generateModels() {
 
   // Génération du json en concervant les liens entre les schemas (Utilisation du "ref")
   let jsonSchema: Record<string, any> = rootSchema.toJSONSchema({
-    unrepresentable: "any",
-    reused: "ref",
-    cycles: "ref"
+    unrepresentable: 'any',
+    reused: 'ref',
+    cycles: 'ref',
   });
 
   // Restructuration du json pour la syntaxe TS
@@ -230,7 +228,7 @@ async function generateModels() {
     if (obj.$ref && typeof obj.$ref === 'string' && obj.$ref.startsWith('#/definitions/')) {
       const refName = obj.$ref.split('/').pop() as string;
 
-      //* Utilisation du "rootDefNames" pour conserver les définitions principal 
+      //* Utilisation du "rootDefNames" pour conserver les définitions principal
       if (!rootDefNames.has(refName) && jsonSchema.definitions[refName]) {
         const defContent = jsonSchema.definitions[refName];
 
@@ -259,7 +257,7 @@ async function generateModels() {
   let tsCode = await compile(jsonSchema as any, 'IGNORE_ME_ROOT', {
     additionalProperties: false,
     bannerComment: '/* \n * Fichier généré automatiquement depuis Zod.\n * NE PAS MODIFIER MANUELLEMENT.\n */',
-    style: { semi: true, singleQuote: true, tabWidth: 4 }
+    style: { semi: true, singleQuote: true, tabWidth: 4 },
   });
 
   // Nettoyage de l'interface généré pour schéma "rootSchema"
