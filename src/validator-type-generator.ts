@@ -1,9 +1,27 @@
-import z, { ZodType } from 'zod';
-import { compile } from 'json-schema-to-typescript';
 import fs from 'fs';
+import { compile } from 'json-schema-to-typescript';
 import path from 'path';
+import z, { ZodType } from 'zod';
 
 const validatorFolder = path.join(__dirname, './validators');
+const outDir = path.join(__dirname, './generated/types');
+
+function deepGetDirectories(baseDir: string, fileValidation?: (f: string) => boolean) {
+  const files: string[] = [];
+  const inFolder = fs.readdirSync(baseDir);
+
+  for (const f of inFolder) {
+    const fPath = baseDir + '/' + f;
+
+    if (fs.statSync(fPath).isDirectory()) {
+      files.push(...deepGetDirectories(fPath));
+    } else {
+      if ((fileValidation && fileValidation(fPath)) || !fileValidation) files.push(fPath);
+    }
+  }
+
+  return files;
+}
 
 function injectTsoaTagsDynamically(schema: any): string[] {
   if (!schema || typeof schema !== 'object') return [];
@@ -28,7 +46,7 @@ function injectTsoaTagsDynamically(schema: any): string[] {
   }
 
   // Sauvegarde de la description initiale
-  let originalDesc = schema.description ? schema.description.trim() : '';
+  const originalDesc = schema.description ? schema.description.trim() : '';
   const bubbledTags: string[] = [];
 
   // BUBBLING : Remonter les règles des nullables (anyOf) ET des descriptions imbriquées (allOf)
@@ -121,22 +139,28 @@ function injectTsoaTagsDynamically(schema: any): string[] {
 // Générateur de type basé sur les schemas Zod
 async function generateModels() {
   console.log('Génération des modèles TypeScript depuis Zod');
+  let numberOfModels = 0;
+
+  // Vider le cache de require/import pour forcer Node à relire les fichiers .schema.ts modifiés en mode watch
+  Object.keys(require.cache).forEach(key => {
+    if (key.includes('/validators/')) {
+      delete require.cache[key];
+    }
+  });
 
   // Répértoire de typage généré
-  const outDir = path.join(__dirname, './generated/types');
   if (fs.existsSync(outDir)) {
     fs.rmSync(outDir, { recursive: true, force: true });
   }
   fs.mkdirSync(outDir, { recursive: true });
 
   // Récuperation des modules de schema Zod
-  const files = fs.readdirSync(validatorFolder).filter(f => f.endsWith('.schema.ts'));
+  const files = deepGetDirectories(validatorFolder, f => f.endsWith('.schema.ts'));
   const globalRegistry: Record<string, ZodType> = {};
 
   for (const file of files) {
     //* Import du module
-    const validatorFile = path.join(validatorFolder, file);
-    const validatorModule = await import(validatorFile);
+    const validatorModule = await import(file);
 
     //* Parcours des exports nommés du module
     for (const exportName of Object.keys(validatorModule)) {
@@ -147,6 +171,7 @@ async function generateModels() {
 
       //* Enregistrement des schemas dans le schema global
       globalRegistry[typeName] = validatorModule[exportName] as ZodType;
+      numberOfModels++;
     }
   }
 
@@ -154,7 +179,7 @@ async function generateModels() {
   const rootSchema = z.object(globalRegistry);
 
   // Génération du json en concervant les liens entre les schemas (Utilisation du "ref")
-  let jsonSchema: Record<string, any> = rootSchema.toJSONSchema({
+  const jsonSchema: Record<string, any> = rootSchema.toJSONSchema({
     unrepresentable: 'any',
     reused: 'ref',
     cycles: 'ref',
@@ -267,6 +292,38 @@ async function generateModels() {
   const filenameGenerated = path.join(outDir, 'models.ts');
   fs.writeFileSync(filenameGenerated, tsCode);
   console.log(`Fichier généré : ${filenameGenerated}`);
+  console.log(`Nombre de model généré: ${numberOfModels}`);
 }
 
-generateModels().catch(console.error);
+// Fonction principale qui gère le cycle de vie du script (Normal vs Watch)
+async function start() {
+  const isWatchMode = process.argv.includes('--watch') || process.argv.includes('-w');
+
+  // Première exécution dans tous les cas
+  await generateModels();
+
+  if (isWatchMode) {
+    console.log(`\x1b[35m[Watch Mode] 👀 Surveillance active sur le dossier : ${validatorFolder}\x1b[0m`);
+
+    let debounceTimeout: NodeJS.Timeout | null = null;
+
+    // Surveillance récursive du dossier des validateurs
+    fs.watch(validatorFolder, { recursive: true }, (eventType, filename) => {
+      if (!filename || !filename.endsWith('.schema.ts')) return;
+
+      // Anti-rebond (debounce) de 200ms pour éviter de trigger 4 fois l'écriture d'un seul fichier
+      if (debounceTimeout) clearTimeout(debounceTimeout);
+
+      debounceTimeout = setTimeout(async () => {
+        console.log(`\x1b[33m[Watch] Changement détecté dans : ${filename}\x1b[0m`);
+        try {
+          await generateModels();
+        } catch (error) {
+          console.error('\x1b[31m❌ Erreur lors de la re-génération :\x1b[0m', error);
+        }
+      }, 200);
+    });
+  }
+}
+
+start().catch(console.error);

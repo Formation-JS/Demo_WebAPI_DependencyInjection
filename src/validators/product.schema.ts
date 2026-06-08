@@ -1,12 +1,10 @@
-import { z } from "zod";
+import { z } from 'zod';
 import { DeliverySchema } from './delivery.schema';
-import { CategorySchema } from './category.schema';
+import { CategorySchema } from './category/category.schema';
 
 // Exemple de schema
 export const ProductSchema = z.object({
-  id: z
-    .uuid()
-    .describe('L\'identifiant unique de l\'objet'),
+  id: z.uuid().describe("L'identifiant unique de l'objet"),
   name: z
     .string()
     .min(3, { error: 'Le nom doit contenir minimum 3 caracteres !' })
@@ -18,38 +16,17 @@ export const ProductSchema = z.object({
     .max(1_000, { error: 'Le nom doit contenir maximum 1000 caracteres !' })
     .optional()
     .describe('Le description du produit'),
-  price: z
-    .number()
-    .min(0, { error: 'Le prix doit être positif' })
-    .describe('Le prix du produit'),
+  price: z.number().min(0, { error: 'Le prix doit être positif' }).describe('Le prix du produit'),
   stockQuantity: z
-    .number({ error: "Le quantité du stock doit être un nombre" })
-    .int({ error: "Le quantité du stock doit être un entier" })
-    .nonnegative({ error: "Le quantité du stock ne peut pas être negative" })
+    .number({ error: 'Le quantité du stock doit être un nombre' })
+    .int({ error: 'Le quantité du stock doit être un entier' })
+    .nonnegative({ error: 'Le quantité du stock ne peut pas être negative' })
     .describe('Le stock actuel du produit'),
-  releaseDate: z.coerce
-    .date({ error: 'La date de sortie doit être valide' })
-    .describe('La date de sortie'),
-  restockDate: z.coerce
-    .date({ error: 'La date de réassort doit être valide' })
-    .optional()
-    .describe('La date de réassort'),
-  isFood: z
-    .boolean({ error: 'La valeur "food" doit être un booléen' })
-    .describe('Booléen pour de l\'alimentaire'),
-  categories: z
-    .array(CategorySchema)
-    .min(1, {error: 'Une categorie minimum'})
-    .describe('Categories du produit'),
-  deliveries: z
-    .record(z.string(), z.array(DeliverySchema))
-    .nullish()
-    .describe('Condionnements du produit'),    
-  tva: z
-    .enum(['NORMAL', 'INTERMEDIATE', 'REDUCED', 'ZERO'])
-    .describe('Type de TVA'),
-  ageRestriction: z
-    .enum(['+3', '+8', '+12', '+16', '+18'])
-    .optional()
-    .describe('Restrictions d\'âge')
+  releaseDate: z.coerce.date({ error: 'La date de sortie doit être valide' }).describe('La date de sortie'),
+  restockDate: z.coerce.date({ error: 'La date de réassort doit être valide' }).optional().describe('La date de réassort'),
+  isFood: z.boolean({ error: 'La valeur "food" doit être un booléen' }).describe("Booléen pour de l'alimentaire"),
+  categories: z.array(CategorySchema).min(1, { error: 'Une categorie minimum' }).describe('Categories du produit'),
+  deliveries: z.record(z.string(), z.array(DeliverySchema)).nullish().describe('Condionnements du produit'),
+  tva: z.enum(['NORMAL', 'INTERMEDIATE', 'REDUCED', 'ZERO']).describe('Type de TVA'),
+  ageRestriction: z.enum(['+3', '+8', '+12', '+16', '+18']).optional().describe("Restrictions d'âge"),
 });

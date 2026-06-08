@@ -8,6 +8,7 @@
   "main": "src/app.ts",
   "scripts": {
     "generate:models": "node -r @swc-node/register ./src/validator-type-generator.ts",
+    "generate:models:watch": "node -r @swc-node/register ./src/validator-type-generator.ts --watch",
     "tsoa": "tsoa spec-and-routes",
     "prebuild": "npm run generate:models && npm run tsoa",
     "build": "tsc",
