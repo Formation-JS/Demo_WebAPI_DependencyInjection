@@ -34,6 +34,11 @@ export const ProductSchema = z.object({
     .date({ error: 'La date de réassort doit être valide' })
     .optional()
     .describe('La date de réassort'),
+  stockoutDate: z.coerce
+    .date({ error: 'La date de fin de stock doit être valide' })
+    .min(new Date('2000-01-01'), { error: 'Date de fin de stock avant 2000' })
+    .optional()
+    .describe('La date de réassort'),
   isFood: z
     .boolean({ error: 'La valeur "food" doit être un booléen' })
     .describe('Booléen pour de l\'alimentaire'),

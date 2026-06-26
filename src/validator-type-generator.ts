@@ -76,6 +76,14 @@ function injectTsoaTagsDynamically(schema: any): string[] {
 
   // Génération des tags pour le noeud
   const tags: string[] = [];
+  if (schema._dateMin !== undefined) {
+    tags.push(`@minDate ${schema._dateMin}`);
+    delete schema._dateMin;
+  }
+  if (schema._dateMax !== undefined) {
+    tags.push(`@maxDate ${schema._dateMax}`);
+    delete schema._dateMax;
+  }
   ['minLength', 'maxLength', 'minimum', 'maximum', 'pattern', 'minItems', 'maxItems'].forEach(
     (rule) => {
       if (schema[rule] !== undefined) {
@@ -178,6 +186,14 @@ async function generateModels() {
         ctx.jsonSchema.format = 'date-time';
         ctx.jsonSchema.tsType = 'Date';
         ctx.jsonSchema._dateMarker = true;
+
+        if (ctx.zodSchema.minDate instanceof Date) {
+          ctx.jsonSchema._dateMin = ctx.zodSchema.minDate.toISOString();
+          // ↑ Pour uniquement la date: .toISOString().split('T')[0];
+        }
+        if (ctx.zodSchema.maxDate instanceof Date) {
+          ctx.jsonSchema._dateMax = ctx.zodSchema.maxDate.toISOString();
+        }
       }
     },
   });
