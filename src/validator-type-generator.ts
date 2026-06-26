@@ -26,21 +26,9 @@ function deepGetDirectories(baseDir: string, fileValidation?: (f: string) => boo
 function injectTsoaTagsDynamically(schema: any): string[] {
   if (!schema || typeof schema !== 'object') return [];
 
-  // Detection magique des dates (et types non représentables)
-  // * Si le nœud est totalement vide `{}`, c'est que Zod l'a mis en "any".
-  // * On le convertit à la volée en type string ISO pour TSOA.
-  // * Alternative : Ajouter un tag "[Date]" dans la description pour le detecter
-  const isZodDateFallback = (!schema.type || schema.type === 'object' || Array.isArray(schema.type))
-    && !schema.properties
-    && !schema.anyOf
-    && !schema.$ref
-    && !schema.items
-    && !schema.additionalProperties;
-
-  if (isZodDateFallback) {
-    schema.type = 'string';
-    schema.format = 'date-time';
-    schema.tsType = 'Date';
+  // Détection des dates via le flag "_dateMarker" injecté par l'override de toJSONSchema()
+  if (schema._dateMarker) {
+    delete schema._dateMarker;
     schema._isDate = true;
   }
 
@@ -184,7 +172,16 @@ async function generateModels() {
     unrepresentable: 'any',
     reused: 'ref',
     cycles: 'ref',
+    override: (ctx: any) => {
+      if (ctx.zodSchema._zod?.def?.type === 'date') {
+        ctx.jsonSchema.type = 'string';
+        ctx.jsonSchema.format = 'date-time';
+        ctx.jsonSchema.tsType = 'Date';
+        ctx.jsonSchema._dateMarker = true;
+      }
+    },
   });
+  console.log(JSON.stringify(jsonSchema, undefined, 2));
 
   // Restructuration du json pour la syntaxe TS
   function mapDefsToDefinitions(obj: any) {
