@@ -197,7 +197,6 @@ async function generateModels() {
       }
     },
   });
-  console.log(JSON.stringify(jsonSchema, undefined, 2));
 
   // Restructuration du json pour la syntaxe TS
   function mapDefsToDefinitions(obj: any) {

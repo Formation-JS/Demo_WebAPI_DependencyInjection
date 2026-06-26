@@ -27,10 +27,10 @@ export const ProductSchema = z.object({
     .int({ error: 'Le quantité du stock doit être un entier' })
     .nonnegative({ error: 'Le quantité du stock ne peut pas être negative' })
     .describe('Le stock actuel du produit'),
-  releaseDate: z.coerce //
+  releaseDate: z.coerce
     .date({ error: 'La date de sortie doit être valide' })
     .describe('La date de sortie'),
-  restockDate: z.coerce //
+  restockDate: z.coerce
     .date({ error: 'La date de réassort doit être valide' })
     .optional()
     .describe('La date de réassort'),

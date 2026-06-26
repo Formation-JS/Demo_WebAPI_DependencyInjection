@@ -44,7 +44,7 @@ Scénarios possibles :
   Décorateur à utiliser : `@UseMiddleware(fct)`  
   _Solution "maison" pour pouvoir utiliser des middlewares Express standards (builders) dans le mécanisme d'Inversify._
 
-## Zod + Tsoa
+## Zod + TSOA
 La validation de données par `TSOA` est basée sur une utilisation de types TS documentés en JSDoc.  
 Dans cette démo, j'ai mis en place une conversion des schémas `Zod` pour générer les fichiers TS.  
 _Cas pratique : Utilisation de schémas de validation communs avec l'app client._  
@@ -54,8 +54,13 @@ Le script `src/validator-type-generator.ts` parcourt les schémas du dossier `sr
 
 Fonctionnement des commandes :
 - `generate:models` : Génération des types basée sur Zod
-- `predev` : Commande lançant les outils de génération _(Déclenchement automatique avant `dev`)_
-- `dev` : Lancement de l'app avec un watcher
+- `generate:models:watch` : Génération avec un mode `watch`
+
+_La génération de code est lancée automatiquement via `predev` et `prebuild`_
+
+### Gestion des dates
+Les règles de validation de type date ne sont pas supportées par la méthode `toJSONSchema` de `Zod`.  
+Une surcharge est implémentée pour détecter les dates, ainsi que la contrainte minimum et maximum.
 
 ## Documentation
 - Inversify : https://inversify.io/docs/introduction/getting-started/
