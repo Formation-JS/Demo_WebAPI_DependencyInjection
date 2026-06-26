@@ -1,6 +1,16 @@
 # Build TSOA
 src/generated
 
+# Tools IA
+.cursor
+.windsurf
+.copilot
+.claude
+.gemini
+.codex
+.aider
+.antigravitycli
+
 # Logs
 logs
 *.log
