@@ -14,7 +14,7 @@ function deepGetDirectories(baseDir: string, fileValidation?: (f: string) => boo
     const fPath = baseDir + '/' + f;
 
     if (fs.statSync(fPath).isDirectory()) {
-      files.push(...deepGetDirectories(fPath));
+      files.push(...deepGetDirectories(fPath, fileValidation));
     } else {
       if ((fileValidation && fileValidation(fPath)) || !fileValidation) files.push(fPath);
     }
